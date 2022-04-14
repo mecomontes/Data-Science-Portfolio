@@ -15,7 +15,6 @@ download('punkt')
 ## Tokenize
 Using the word_tokenize method from nltk to tokenize the data in the input file. Symbols are included when it will be tokenized.
 
-
 ```python
 with open('/content/example.txt') as file:
   raw_text = file.read()
@@ -57,9 +56,6 @@ vectorized_text = CountVectorizer()
 vectorized_text.fit(tokenized_text)
 vectorized_text.get_feature_names()
 ```
-
-    /usr/local/lib/python3.7/dist-packages/sklearn/utils/deprecation.py:87: FutureWarning: Function get_feature_names is deprecated; get_feature_names is deprecated in 1.0 and will be removed in 1.2. Please use get_feature_names_out instead.
-      warnings.warn(msg, category=FutureWarning)
 
     ['example',
      'for',
@@ -161,7 +157,293 @@ tfidf.fit(X)
 tfidf_text = tfidf.transform(X)
 tfidf_text
 ```
-
     <22x16 sparse matrix of type '<class 'numpy.float64'>'
     	with 18 stored elements in Compressed Sparse Row format>
+
+## Rating bot
+
+```python
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+
+df = pd.read_csv('/content/reviews.csv')
+df.head(20)
+```
+  <div id="df-f0a326f7-fcf2-4aca-880c-fa008b6c65c9">
+    <div class="colab-df-container">
+      <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Reviews</th>
+      <th>Rating</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>The product is fairly good but it has scratche...</td>
+      <td>Average</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Not same as told in the description</td>
+      <td>Poor</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>It is worth the money!</td>
+      <td>Good</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Delivered product is not genuine</td>
+      <td>Poor</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>I'm not satisifed with the build quality</td>
+      <td>Poor</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>This is considerably good for the price range</td>
+      <td>Good</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>The product is fine but the packaging isn't good</td>
+      <td>Average</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>I am satisfied</td>
+      <td>Average</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>Certainly a better version is availble but it ...</td>
+      <td>Average</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>The product is damaged</td>
+      <td>Poor</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>I will recommend everyone to go for this</td>
+      <td>Good</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>It was not worth the money</td>
+      <td>Poor</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>The product is a fake copy of the genuine</td>
+      <td>Poor</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>Evrything is fine except for the packaging</td>
+      <td>Average</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>Does not come with warranty card</td>
+      <td>Poor</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>The build quality is awesome for the price</td>
+      <td>Good</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>Cannot find any better</td>
+      <td>Good</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>Complete satisfactory</td>
+      <td>Good</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>Packaging was torn off but the product is fine</td>
+      <td>Average</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>This is not good for the price range</td>
+      <td>Poor</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+ 
+```python
+X = df['Reviews']
+vectorized_features = CountVectorizer()
+vectorized_features.fit(X)
+vectorized_X = vectorized_features.transform(X)
+vectorized_features.get_feature_names()
+```
+
+    ['am',
+     'any',
+     'as',
+     'availble',
+     'awesome',
+     'better',
+     'box',
+     'build',
+     'but',
+     'cannot',
+     'card',
+     'certainly',
+     'come',
+     'complete',
+     'considerably',
+     'copy',
+     'damaged',
+     'delivered',
+     'description',
+     'does',
+     'everyone',
+     'evrything',
+     'except',
+     'fairly',
+     'fake',
+     'find',
+     'fine',
+     'for',
+     'genuine',
+     'go',
+     'good',
+     'has',
+     'in',
+     'is',
+     'isn',
+     'it',
+     'money',
+     'not',
+     'of',
+     'off',
+     'on',
+     'packaging',
+     'price',
+     'product',
+     'quality',
+     'range',
+     'recommend',
+     'same',
+     'satisfactory',
+     'satisfied',
+     'satisifed',
+     'scratches',
+     'the',
+     'this',
+     'to',
+     'told',
+     'torn',
+     'version',
+     'warranty',
+     'was',
+     'will',
+     'with',
+     'worth']
+
+```python
+tfidf = TfidfTransformer()
+tfidf.fit(vectorized_X)
+X_reviews = tfidf.transform(vectorized_X)
+X_reviews
+```
+
+    <20x63 sparse matrix of type '<class 'numpy.float64'>'
+    	with 127 stored elements in Compressed Sparse Row format>
+
+```python
+y = df['Rating'].tolist()
+y
+```
+
+    ['Average',
+     'Poor',
+     'Good',
+     'Poor',
+     'Poor',
+     'Good',
+     'Average',
+     'Average',
+     'Average',
+     'Poor',
+     'Good',
+     'Poor',
+     'Poor',
+     'Average',
+     'Poor',
+     'Good',
+     'Good',
+     'Good',
+     'Average',
+     'Poor']
+
+```python
+from sklearn.tree import DecisionTreeClassifier
+
+model = DecisionTreeClassifier()
+model.fit(X_reviews, y)
+```
+
+    DecisionTreeClassifier()
+
+```python
+text = ['This product is in a good condition']
+vectorized_text = vectorized_features.transform(text)
+tfidf_text = tfidf.transform(vectorized_text)
+model.predict(tfidf_text)
+```
+
+    array(['Poor'], dtype='<U7')
+
+## Creating the function to rate reviews
+
+```python
+def rate(*comment):
+  vectorized_text = vectorized_features.transform(comment)
+  tfidf_text = tfidf.transform(vectorized_text)
+  pred = model.predict(tfidf_text)
+
+  for review, rating in zip(comment, pred):
+    print(f'{review}\n Rating: {rating}')
+```
+
+```python
+rate('Not in good condition', 'It is satisfactory', 'Too late')
+```
+
+    Not in good condition
+     Rating: Poor
+    It is satisfactory
+     Rating: Good
+    Too late
+     Rating: Good
 
